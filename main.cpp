@@ -3,32 +3,33 @@
  * E PODERÁ SER UTILIZADO COMO PONTO DE PARTIDA PARA IMPLEMENTAÇÃO DO ANALISADOR LÉXICO PARA LINGUAGEM ADOTADA NO TRABALHO PROPOSTO.
  * */
 
-#include <stdio.h>
+#include <iostream>
+#include <vector>
 
+using namespace std;
 
 //NOME TOKENS
-#define IF  256;
-#define THEN  257;
-#define ELSE  258;
-
-#define ELSEIF  259;
-#define FOR  260;
-#define WHILE  261;
-#define AND  262;
-#define BREAK  263;
-#define DO  264;
-#define END  265;
-#define FUNCTION  266;
-#define IN  267;
-#define LOCAL  268;
-#define NILL  269;
-#define NOT  270;
-#define OR  271;
-#define REPEAT  272;
-#define RETURN  273;
-#define TRUE  274;
-#define FALSE  275;
-#define UNTIL  276;
+#define AND  256;
+#define BREAK  257;
+#define DO  258;
+#define ELSE  259;
+#define ELSEIF  260;
+#define END  261;
+#define FALSE  262;
+#define FOR  263;
+#define FUNCTION  264;
+#define IF  265;
+#define IN  266;
+#define LOCAL  267;
+#define NIL  268;
+#define NOT  269;
+#define OR  270;
+#define REPEAT  271;
+#define RETURN  272;
+#define THEN  273;
+#define UNTIL  274;
+#define TRUE  275;
+#define WHILE  276;
 
 
 #define ID  277;
@@ -53,15 +54,19 @@ struct Token{
 };
 
 
-
 int estado = 0;
 int partida = 0;
 int cont_sim_lido = 0;
 char *code;
 
+vector<string> reservados = {"and", "break", "do", "else", "elseif", "end", "false", "for", "function"
+"if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "until", "true", "while"};
+int count_tabela = 0;
+vector<string> tabela;
+string identifier;
 
-char *readFile(char *fileName)
-{
+
+char *readFile(char *fileName){
 	FILE *file = fopen(fileName, "r");
 	char *code;
 	int n = 0;
@@ -75,42 +80,38 @@ char *readFile(char *fileName)
 
 	code = new char (f_size);
 
-	while ((c = fgetc(file))!= EOF)
-	{
+	while ((c = fgetc(file))!= EOF)	{
 		code[n++] = (char) c;
 	}
+
 	code[n] = '\0';
 	return code;
 }
 
+int falhar(){
+	switch(estado){
 
+		case 0: partida = 12; break;
 
+		case 9: partida = 12; break;
 
-int falhar()
-{
-	switch(estado)
-	{
-	case 0: partida = 12; break;
+		case 12: partida = 20; break;
 
-	// case 9: partida = 12; break;
+		case 20: partida = 25; break;
 
-	// case 12: partida = 20; break;
+		case 25:
+			//retornar msg de erro
+			printf("Erro encontrado no código\n");
+			cont_sim_lido++;
+			break;
 
-	// case 20: partida = 25; break;
+		default: printf("Erro do compilador");
+	}
 
-	// case 25:
-	// 	//retornar msg de erro
-	// 	printf("Erro encontrado no código\n");
-	// 	cont_sim_lido++;
-	// 	break;
-
-	// default: printf("Erro do compilador");
-	// }
-	// return(partida);
+	return(partida);
 }
 
-Token proximo_token()
-{
+Token proximo_token(){
 	Token token;
 	char c;
 	while(code[cont_sim_lido] != EOF)
@@ -145,7 +146,8 @@ Token proximo_token()
 					}
 
 				if(c == '=') estado = 2;
-				else estado = 3;
+				else if(c == '>') estado = 8;
+				else estado = 4;
 				break;
 
 			case 2:
@@ -184,7 +186,7 @@ Token proximo_token()
 				// cont_sim_lido++;
 				printf("<=, >\n");
 				token.nome_token = '=';
-				token.atributo = '';
+				token.atributo = ' ';
 				estado = 0;
 				return(token);
 				break;
@@ -209,7 +211,8 @@ Token proximo_token()
 					}
 
 				if(c == '=') estado = 8;
-				//else estado = ?;
+				else falhar();
+
 				break;    
 
 			case 8:
@@ -236,7 +239,7 @@ Token proximo_token()
 				break;   
 
 			case 10:
-				// cont_sim_lido++;
+				cont_sim_lido++;
 				printf("<relop, GT>\n");
 				token.nome_token = RELOP;
 				token.atributo = GT;
@@ -255,37 +258,56 @@ Token proximo_token()
 
 			case 12:
 				c = code[cont_sim_lido];
-				if((c == ' ')||(c == '\n'))
-				{
+				if((c == ' ')||(c == '\n')){
 					estado = 0;
 					cont_sim_lido++;
 				}
-				else if(isalpha(c) || c == '_') estado = 13;
-				
-
-				else
-					{
+				else if(isalpha(c) || c == '_'){
+					identifier += c;
+					estado = 13;
+				}
+				else{
 					 estado = falhar();
-					}
+				}
 				break;
 
 			case 13:
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
 
-                if(isalpha(c) || isdigit(c) || c == '_' ) estado = 13;
-                else estado = 14;
+                if(isalpha(c) || isdigit(c) || c == '_' ){
+					identifier += c;
+					estado = 13;
+				}else{
+					estado = 14;
+				}
 
+				break;
             case 14:
-				printf("<ID, GT>\n");
-				token.nome_token = ID;
-				token.atributo = GT;
+				bool is_res = false;
+				int i = 0;
+				for(; i < reservados.size(); i++){
+					// Neste for percorreremos as palavras reservadas vendo se é uma ou não
+					if(identifier == reservados[i]){
+						is_res = true;
+						break;
+					}
+				}
+				if(is_res){
+					printf("<%s, >", identifier);					// Exibe o token da palavra reservada
+					token.nome_token = i + 256;			// Como está ordenado de acordo com as definições de cada palavra reservada, estou somando
+					token.atributo = ' ';				// o índice que parou no for com 256 para obter o código da palavra reservada correta
+				}else{
+					tabela.push_back(identifier);		// Coloca o identificador na tabela
+					printf("<ID, %d>", count_tabela);	// Exibe o token na tela
+					token.nome_token = ID;				
+					token.atributo = count_tabela;
+					count_tabela++;						// Incrementa a variável que controla quantidade de identificadores
+				}
+				identifier = "";						// Retorna a variável que guarda identificador para valor vazio
 				estado = 0;
 				return(token);
 				break;                    
-
-
-
 		}
 
 	}
@@ -294,11 +316,7 @@ Token proximo_token()
 	return(token);
 }
 
-
-
-
-int main ()
-{
+int main (){
 	Token token;
     char t[] = "programa.txt";
     code = readFile(t);
