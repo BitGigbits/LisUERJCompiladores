@@ -9,42 +9,42 @@
 using namespace std;
 
 //NOME TOKENS
-#define AND  256;
-#define BREAK  257;
-#define DO  258;
-#define ELSE  259;
-#define ELSEIF  260;
-#define END  261;
-#define FALSE  262;
-#define FOR  263;
-#define FUNCTION  264;
-#define IF  265;
-#define IN  266;
-#define LOCAL  267;
-#define NIL  268;
-#define NOT  269;
-#define OR  270;
-#define REPEAT  271;
-#define RETURN  272;
-#define THEN  273;
-#define UNTIL  274;
-#define TRUE  275;
-#define WHILE  276;
+#define AND  256
+#define BREAK  257
+#define DO  258
+#define ELSE  259
+#define ELSEIF  260
+#define END  261
+#define FALSE  262
+#define FOR  263
+#define FUNCTION  264
+#define IF  265
+#define IN  266
+#define LOCAL  267
+#define NIL  268
+#define NOT  269
+#define OR  270
+#define REPEAT  271
+#define RETURN  272
+#define THEN  273
+#define UNTIL  274
+#define TRUE  275
+#define WHILE  276
 
 
-#define ID  277;
-#define NUM  278;
+#define ID  277
+#define NUM  278
 
-#define RELOP  279;
+#define RELOP  279
 
 //ATRIBUTOS DE RELOP ~= | <= | >= | < | > | ==
 
-#define LT 280; // <
-#define LE 281; // <=
-#define EQ 282; // ==
-#define NE 283; // ~=
-#define GT 284; // >
-#define GE 285; // >=
+#define LT 280 // <
+#define LE 281 // <=
+#define EQ 282 // ==
+#define NE 283 // ~=
+#define GT 284 // >
+#define GE 285 // >=
 
 // DELIM  ( | ) | { | } | [ | ] | ; | : | , | . | ..
  
@@ -65,10 +65,9 @@ int count_tabela = 0;
 vector<string> tabela;
 string identifier;
 
-
 char *readFile(char *fileName){
 	FILE *file = fopen(fileName, "r");
-	char *code;
+	char *code_;
 	int n = 0;
 	int c;
 
@@ -78,14 +77,14 @@ char *readFile(char *fileName){
 	long f_size = ftell(file);
 	fseek(file, 0, SEEK_SET);
 
-	code = new char (f_size);
+	code_ = new char (f_size);
 
-	while ((c = fgetc(file))!= EOF)	{
-		code[n++] = (char) c;
+	while ((c = fgetc(file))!= EOF)
+	{
+		code_[n++] = (char) c;
 	}
-
-	code[n] = '\0';
-	return code;
+	code_[n] = '\0';
+	return code_;
 }
 
 int falhar(){
@@ -114,14 +113,11 @@ int falhar(){
 Token proximo_token(){
 	Token token;
 	char c;
-	while(code[cont_sim_lido] != EOF)
-	{
-		switch(estado)
-		{
+	while(code[cont_sim_lido] != EOF){
+		switch(estado){
 			case 0:
 				c = code[cont_sim_lido];
-				if((c == ' ')||(c == '\n'))
-				{
+				if((c == ' ')||(c == '\n')){
 					estado = 0;
 					cont_sim_lido++;
 				}
@@ -129,27 +125,23 @@ Token proximo_token(){
 				else if(c == '=') estado = 4;
 				else if(c == '~') estado = 7;
 				else if(c == '>') estado = 9;
-				else
-					{
+				else{
 					 estado = falhar();
-					}
-				break;
+				}
 
+				break;
 			case 1:
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
 
-				if((c == ' ')||(c == '\n'))
-					{
+				if((c == ' ')||(c == '\n')){
 						cont_sim_lido++;
 						c = code[cont_sim_lido];
 					}
 
 				if(c == '=') estado = 2;
-				else if(c == '>') estado = 8;
-				else estado = 4;
+				else estado = 3;
 				break;
-
 			case 2:
 				cont_sim_lido++;
 				printf("<relop, LE>\n");
@@ -158,39 +150,32 @@ Token proximo_token(){
 				estado = 0;
 				return(token);
 				break;
-
-			case 3: 
-				// cont_sim_lido++;
+			case 3:
 				printf("<relop, LT>\n");
 				token.nome_token = RELOP;
 				token.atributo = LT;
 				estado = 0;
 				return(token);
 				break;
-
             case 4:
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
 
-				if((c == ' ')||(c == '\n'))
-					{
-						cont_sim_lido++;
-						c = code[cont_sim_lido];
-					}
+				if((c == ' ')||(c == '\n')){
+					cont_sim_lido++;
+					c = code[cont_sim_lido];
+				}
 
 				if(c == '=') estado = 6;
 				else estado = 5;
 				break;    
-
 			case 5: 
-				// cont_sim_lido++;
 				printf("<=, >\n");
 				token.nome_token = '=';
 				token.atributo = ' ';
 				estado = 0;
 				return(token);
 				break;
-
 			case 6:
 				cont_sim_lido++;
 				printf("<relop, EQ>\n");
@@ -199,22 +184,21 @@ Token proximo_token(){
 				estado = 0;
 				return(token);
 				break;
-
             case 7:
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
 
-				if((c == ' ')||(c == '\n'))
-					{
-						cont_sim_lido++;
-						c = code[cont_sim_lido];
-					}
-
-				if(c == '=') estado = 8;
-				else falhar();
-
+				if((c == ' ')||(c == '\n')){
+					cont_sim_lido++;
+					c = code[cont_sim_lido];
+				}
+				
+				if(c == '='){
+					estado = 8;
+				}else{
+					falhar();
+				}
 				break;    
-
 			case 8:
 				cont_sim_lido++;
 				printf("<relop, NE>\n");
@@ -223,16 +207,14 @@ Token proximo_token(){
 				estado = 0;
 				return(token);
 				break;
-
             case 9:
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
 
-				if((c == ' ')||(c == '\n'))
-					{
-						cont_sim_lido++;
-						c = code[cont_sim_lido];
-					}
+				if((c == ' ')||(c == '\n')){
+					cont_sim_lido++;
+					c = code[cont_sim_lido];
+				}
 
 				if(c == '=') estado = 11;
 				else estado = 10;
@@ -285,7 +267,7 @@ Token proximo_token(){
 				break;
             case 14:
 				bool is_res = false;
-				int i = 0;
+				unsigned int i = 0;
 				for(; i < reservados.size(); i++){
 					// Neste for percorreremos as palavras reservadas vendo se é uma ou não
 					if(identifier == reservados[i]){
@@ -294,7 +276,7 @@ Token proximo_token(){
 					}
 				}
 				if(is_res){
-					printf("<%s, >", identifier);					// Exibe o token da palavra reservada
+					cout << "<" << identifier << ", >";	// Exibe o token da palavra reservada
 					token.nome_token = i + 256;			// Como está ordenado de acordo com as definições de cada palavra reservada, estou somando
 					token.atributo = ' ';				// o índice que parou no for com 256 para obter o código da palavra reservada correta
 				}else{
@@ -318,11 +300,24 @@ Token proximo_token(){
 
 int main (){
 	Token token;
-    char t[] = "programa.txt";
-    code = readFile(t);
+    code = readFile("programa.txt");
+    if (code != NULL) {
+        cout << "Conteúdo do arquivo:\n" << code << endl;
+        delete[] code;
+    } else {
+        cout << "Falha ao ler o arquivo." << endl;
+    }
     token = proximo_token();
     token = proximo_token();
-    //...
+    token = proximo_token();
+    token = proximo_token();
+    token = proximo_token();
+    token = proximo_token();
+    token = proximo_token();
+    token = proximo_token();
+    token = proximo_token();
 
+	delete[] code;
 
+	return 0;
 }
