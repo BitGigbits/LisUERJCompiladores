@@ -330,6 +330,7 @@ Token proximo_token(){
 				}
 				token.atributo = stoi(numeral);
 				numeral = "";
+				estado = 0;
 				return(token);
 				break;
 			default:
