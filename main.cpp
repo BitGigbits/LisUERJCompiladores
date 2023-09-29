@@ -5,6 +5,8 @@
 
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -57,34 +59,34 @@ struct Token{
 int estado = 0;
 int partida = 0;
 int cont_sim_lido = 0;
-char *code;
+int is_float = false;
+int cont_tam = 0;
+bool is_res = false;
+unsigned int i = 0;
+string code;
 
-vector<string> reservados = {"and", "break", "do", "else", "elseif", "end", "false", "for", "function"
+vector<string> reservados = {"and", "break", "do", "else", "elseif", "end", "false", "for", "function",
 "if", "in", "local", "nil", "not", "or", "repeat", "return", "then", "until", "true", "while"};
 int count_tabela = 0;
 vector<string> tabela;
-string identifier;
+string identifier = "";
+string numeral = "";
 
-char *readFile(char *fileName){
-	FILE *file = fopen(fileName, "r");
-	char *code_;
-	int n = 0;
-	int c;
+void readFile(){
+	string nomeArquivo = "programa.txt";
+    ifstream arquivo(nomeArquivo);
 
-	if(file == NULL) return NULL;
+    if (!arquivo.is_open()){
+        cout << "Não foi possível abrir o arquivo: " << nomeArquivo << "\n";
+    }
 
-	fseek(file, 0, SEEK_END);
-	long f_size = ftell(file);
-	fseek(file, 0, SEEK_SET);
+    string linha;
 
-	code_ = new char (f_size);
+    while (std::getline(arquivo, linha)) {
+        code += linha + '\n';
+    }
 
-	while ((c = fgetc(file))!= EOF)
-	{
-		code_[n++] = (char) c;
-	}
-	code_[n] = '\0';
-	return code_;
+    arquivo.close();
 }
 
 int falhar(){
@@ -92,17 +94,7 @@ int falhar(){
 
 		case 0: partida = 12; break;
 
-		case 9: partida = 12; break;
-
-		case 12: partida = 20; break;
-
-		case 20: partida = 25; break;
-
-		case 25:
-			//retornar msg de erro
-			printf("Erro encontrado no código\n");
-			cont_sim_lido++;
-			break;
+		case 12: partida = 15; break;
 
 		default: printf("Erro do compilador");
 	}
@@ -113,7 +105,8 @@ int falhar(){
 Token proximo_token(){
 	Token token;
 	char c;
-	while(code[cont_sim_lido] != EOF){
+	long long int tam = code.length();
+	while(code[cont_sim_lido] != '\0'){
 		switch(estado){
 			case 0:
 				c = code[cont_sim_lido];
@@ -128,7 +121,6 @@ Token proximo_token(){
 				else{
 					 estado = falhar();
 				}
-
 				break;
 			case 1:
 				cont_sim_lido++;
@@ -196,7 +188,7 @@ Token proximo_token(){
 				if(c == '='){
 					estado = 8;
 				}else{
-					falhar();
+					printf("Erro, nao ha caractere valido apos o ~\n");
 				}
 				break;    
 			case 8:
@@ -219,7 +211,6 @@ Token proximo_token(){
 				if(c == '=') estado = 11;
 				else estado = 10;
 				break;   
-
 			case 10:
 				cont_sim_lido++;
 				printf("<relop, GT>\n");
@@ -228,7 +219,6 @@ Token proximo_token(){
 				estado = 0;
 				return(token);
 				break;
-
 			case 11:
 				cont_sim_lido++;
 				printf("<relop, GE>\n");
@@ -237,7 +227,6 @@ Token proximo_token(){
 				estado = 0;
 				return(token);
 				break;
-
 			case 12:
 				c = code[cont_sim_lido];
 				if((c == ' ')||(c == '\n')){
@@ -252,7 +241,6 @@ Token proximo_token(){
 					 estado = falhar();
 				}
 				break;
-
 			case 13:
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
@@ -266,8 +254,8 @@ Token proximo_token(){
 
 				break;
             case 14:
-				bool is_res = false;
-				unsigned int i = 0;
+				is_res = false;
+				i = 0;
 				for(; i < reservados.size(); i++){
 					// Neste for percorreremos as palavras reservadas vendo se é uma ou não
 					if(identifier == reservados[i]){
@@ -276,22 +264,78 @@ Token proximo_token(){
 					}
 				}
 				if(is_res){
-					cout << "<" << identifier << ", >";	// Exibe o token da palavra reservada
-					token.nome_token = i + 256;			// Como está ordenado de acordo com as definições de cada palavra reservada, estou somando
-					token.atributo = ' ';				// o índice que parou no for com 256 para obter o código da palavra reservada correta
+					printf("<%s, >\n", identifier.c_str());	// Exibe o token da palavra reservada
+					token.nome_token = i + 256;				// Como está ordenado de acordo com as definições de cada palavra reservada, estou somando
+					token.atributo = ' ';					// o índice que parou no for com 256 para obter o código da palavra reservada correta
 				}else{
-					tabela.push_back(identifier);		// Coloca o identificador na tabela
-					printf("<ID, %d>", count_tabela);	// Exibe o token na tela
+					tabela.push_back(identifier);			// Coloca o identificador na tabela
+					printf("<ID, %d>\n", count_tabela);		// Exibe o token na tela
 					token.nome_token = ID;				
 					token.atributo = count_tabela;
-					count_tabela++;						// Incrementa a variável que controla quantidade de identificadores
+					count_tabela++;							// Incrementa a variável que controla quantidade de identificadores
 				}
-				identifier = "";						// Retorna a variável que guarda identificador para valor vazio
+				identifier = "";							// Retorna a variável que guarda identificador para valor vazio
 				estado = 0;
 				return(token);
-				break;                    
+				break;
+			case 15:
+				c = code[cont_sim_lido];
+				if((c == ' ')||(c == '\n')){
+					estado = 0;
+					cont_sim_lido++;
+				}
+				if(isdigit(c)){
+					numeral += c;
+					estado = 16;
+				}else{
+					falhar();
+				}
+				break;
+			case 16:
+				cont_sim_lido++;
+				c = code[cont_sim_lido];
+				if(isdigit(c)){
+					numeral += c;
+				}else if(c == '.'){	
+					estado = 17;
+				}else{
+					estado = 19;
+				}
+				break;
+			case 17:
+				cont_sim_lido++;
+				c = code[cont_sim_lido];
+				is_float = true;
+				if(isdigit(c)){
+					numeral += c;
+					estado = 18;
+				}else{
+					printf("Erro no numero decimal\n");
+				}
+				break;
+			case 18:
+				cont_sim_lido++;
+				c = code[cont_sim_lido];
+				if(isdigit(c)){	
+					numeral += c;
+				}else{
+					estado = 19;
+				}
+				break;
+			case 19:
+				printf("<numero, %s>\n", numeral.c_str());
+				token.nome_token = NUM;
+				if(is_float){
+					token.atributo = stof(numeral);
+				}
+				token.atributo = stoi(numeral);
+				numeral = "";
+				return(token);
+				break;
+			default:
+				printf("Erro no compilador");
+				break;
 		}
-
 	}
 	token.nome_token = EOF;
 	token.atributo = -1;
@@ -300,24 +344,10 @@ Token proximo_token(){
 
 int main (){
 	Token token;
-    code = readFile("programa.txt");
-    if (code != NULL) {
-        cout << "Conteúdo do arquivo:\n" << code << endl;
-        delete[] code;
-    } else {
-        cout << "Falha ao ler o arquivo." << endl;
-    }
-    token = proximo_token();
-    token = proximo_token();
-    token = proximo_token();
-    token = proximo_token();
-    token = proximo_token();
-    token = proximo_token();
-    token = proximo_token();
-    token = proximo_token();
-    token = proximo_token();
-
-	delete[] code;
+	readFile();
+    while(code[cont_sim_lido] != '\0'){
+		token = proximo_token();
+	}
 
 	return 0;
 }
