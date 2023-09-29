@@ -1,8 +1,3 @@
-/*
- * ESTE CÓDIGO IMPLEMENTA UM ANALIZADOR LÉXICO PARA O EXEMPLO DE FRAGMENTO DE LINGUAGEM APRESENTADO EM SALA DE AULA (VEJA OS SLIDES DA AULA 4: ANÁLISE LÉXICA: PARTE 2)
- * E PODERÁ SER UTILIZADO COMO PONTO DE PARTIDA PARA IMPLEMENTAÇÃO DO ANALISADOR LÉXICO PARA LINGUAGEM ADOTADA NO TRABALHO PROPOSTO.
- * */
-
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -36,7 +31,6 @@ using namespace std;
 
 #define ID  277
 #define NUM  278
-
 #define RELOP  279
 
 //ATRIBUTOS DE RELOP ~= | <= | >= | < | > | ==
@@ -47,6 +41,14 @@ using namespace std;
 #define NE 283 // ~=
 #define GT 284 // >
 #define GE 285 // >=
+
+// OPERADORES
+
+#define PLUS 286 // +
+#define SUBT 287 // -
+#define MULT 288 // *
+#define DIV 289 // /
+#define POW 290 // ^
 
 // DELIM  ( | ) | { | } | [ | ] | ; | : | , | . | ..
  
@@ -59,8 +61,6 @@ struct Token{
 int estado = 0;
 int partida = 0;
 int cont_sim_lido = 0;
-int is_float = false;
-int cont_tam = 0;
 bool is_res = false;
 unsigned int i = 0;
 string code;
@@ -82,7 +82,7 @@ void readFile(){
 
     string linha;
 
-    while (std::getline(arquivo, linha)) {
+    while (getline(arquivo, linha)) {
         code += linha + '\n';
     }
 
@@ -96,6 +96,11 @@ int falhar(){
 
 		case 12: partida = 15; break;
 
+		case 15:
+			printf("Erro no código.\n");
+			partida = -1;
+			break;
+
 		default: printf("Erro do compilador");
 	}
 
@@ -105,7 +110,6 @@ int falhar(){
 Token proximo_token(){
 	Token token;
 	char c;
-	long long int tam = code.length();
 	while(code[cont_sim_lido] != '\0'){
 		switch(estado){
 			case 0:
@@ -118,6 +122,11 @@ Token proximo_token(){
 				else if(c == '=') estado = 4;
 				else if(c == '~') estado = 7;
 				else if(c == '>') estado = 9;
+				else if(c == '+') estado = 18;
+				else if(c == '-') estado = 19;
+				else if(c == '*') estado = 20;
+				else if(c == '/') estado = 21;
+				else if(c == '^') estado = 22;
 				else{
 					 estado = falhar();
 				}
@@ -296,40 +305,55 @@ Token proximo_token(){
 				c = code[cont_sim_lido];
 				if(isdigit(c)){
 					numeral += c;
-				}else if(c == '.'){	
-					estado = 17;
 				}else{
-					estado = 19;
+					estado = 17;
 				}
 				break;
 			case 17:
-				cont_sim_lido++;
-				c = code[cont_sim_lido];
-				is_float = true;
-				if(isdigit(c)){
-					numeral += c;
-					estado = 18;
-				}else{
-					printf("Erro no numero decimal\n");
-				}
+				printf("<numero, %s>\n", numeral.c_str());
+				token.nome_token = NUM;
+				token.atributo = stoi(numeral);
+				numeral = "";
+				estado = 0;
+				return(token);
 				break;
 			case 18:
 				cont_sim_lido++;
-				c = code[cont_sim_lido];
-				if(isdigit(c)){	
-					numeral += c;
-				}else{
-					estado = 19;
-				}
+				printf("<+, >\n");
+				token.nome_token = PLUS;
+				token.atributo = ' ';
+				estado = 0;
+				return(token);
 				break;
 			case 19:
-				printf("<numero, %s>\n", numeral.c_str());
-				token.nome_token = NUM;
-				if(is_float){
-					token.atributo = stof(numeral);
-				}
-				token.atributo = stoi(numeral);
-				numeral = "";
+				cont_sim_lido++;
+				printf("<-, >\n");
+				token.nome_token = SUBT;
+				token.atributo = ' ';
+				estado = 0;
+				return(token);
+				break;
+			case 20:
+				cont_sim_lido++;
+				printf("<*, >\n");
+				token.nome_token = MULT;
+				token.atributo = ' ';
+				estado = 0;
+				return(token);
+				break;
+			case 21:
+				cont_sim_lido++;
+				printf("</, >\n");
+				token.nome_token = DIV;
+				token.atributo = ' ';
+				estado = 0;
+				return(token);
+				break;
+			case 22:
+				cont_sim_lido++;
+				printf("<^, >\n");
+				token.nome_token = POW;
+				token.atributo = ' ';
 				estado = 0;
 				return(token);
 				break;
