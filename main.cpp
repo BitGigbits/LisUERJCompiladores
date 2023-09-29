@@ -3,6 +3,10 @@
 #include <fstream>
 #include <string>
 
+//Alunos:
+// Pedro Lucas Lessa Martins
+// Diogo Luis de Freitas Corrêa
+
 using namespace std;
 
 //NOME TOKENS
@@ -31,30 +35,46 @@ using namespace std;
 
 #define ID  277
 #define NUM  278
-#define RELOP  279
+#define LIT 279
+#define RELOP  280
 
 //ATRIBUTOS DE RELOP ~= | <= | >= | < | > | ==
 
-#define LT 280 // <
-#define LE 281 // <=
-#define EQ 282 // ==
-#define NE 283 // ~=
-#define GT 284 // >
-#define GE 285 // >=
+#define LT 281 // <
+#define LE 282 // <=
+#define EQ 283 // ==
+#define NE 284 // ~=
+#define GT 285 // >
+#define GE 286 // >=
 
 // OPERADORES
 
-#define PLUS 286 // +
-#define SUBT 287 // -
-#define MULT 288 // *
-#define DIV 289 // /
-#define POW 290 // ^
+#define PLUS 287 // +
+#define SUBT 288 // -
+#define MULT 289 // *
+#define DIV 290 // /
+#define POW 291 // ^
+#define ATR 292 // =
 
 // DELIM  ( | ) | { | } | [ | ] | ; | : | , | . | ..
+
+// OP = OPEN
+// CL = CLOSE
+
+#define OP_P 293
+#define CL_P 294
+#define OP_K 295
+#define CL_K 296
+#define OP_C 297
+#define CL_C 298
+#define PTVIR 299
+#define PTPT 300
+
+// Definindo os delimiadores mas usaremos codigo da tabela ascii
  
 struct Token{
  int nome_token;
- int atributo;
+ string atributo;
 };
 
 
@@ -71,13 +91,14 @@ int count_tabela = 0;
 vector<string> tabela;
 string identifier = "";
 string numeral = "";
+string literal = "";
 
 void readFile(){
 	string nomeArquivo = "programa.txt";
     ifstream arquivo(nomeArquivo);
 
     if (!arquivo.is_open()){
-        cout << "Não foi possível abrir o arquivo: " << nomeArquivo << "\n";
+        cout << "Nao foi possivel abrir o arquivo: " << nomeArquivo << "\n";
     }
 
     string linha;
@@ -95,8 +116,12 @@ int falhar(){
 		case 0: partida = 12; break;
 
 		case 12: partida = 15; break;
+		
+		case 15: partida = 23; break;
 
-		case 15:
+		case 23: partida = 27; break;
+
+		case 27:
 			printf("Erro no código.\n");
 			partida = -1;
 			break;
@@ -127,6 +152,23 @@ Token proximo_token(){
 				else if(c == '*') estado = 20;
 				else if(c == '/') estado = 21;
 				else if(c == '^') estado = 22;
+				else if(c == '(') estado = 31;
+				else if(c == ')') estado = 32;
+				else if(c == '{') estado = 33;
+				else if(c == '}') estado = 34;
+				else if(c == '[') estado = 35;
+				else if(c == ']') estado = 36;
+				else if(c == ';') estado = 37;
+				else if(c == ',') estado = 38;
+				else if(c == '.'){
+					cont_sim_lido++;
+					if(c == '.'){
+						estado = 39;
+					}else{
+						cont_sim_lido--;
+						estado = 40;
+					}
+				}else if(c == ':') estado = 41;
 				else{
 					 estado = falhar();
 				}
@@ -147,14 +189,14 @@ Token proximo_token(){
 				cont_sim_lido++;
 				printf("<relop, LE>\n");
 				token.nome_token = RELOP;
-				token.atributo = LE;
+				token.atributo = to_string(LE);
 				estado = 0;
 				return(token);
 				break;
 			case 3:
 				printf("<relop, LT>\n");
 				token.nome_token = RELOP;
-				token.atributo = LT;
+				token.atributo = to_string(LT);
 				estado = 0;
 				return(token);
 				break;
@@ -172,7 +214,7 @@ Token proximo_token(){
 				break;    
 			case 5: 
 				printf("<=, >\n");
-				token.nome_token = '=';
+				token.nome_token = ATR;
 				token.atributo = ' ';
 				estado = 0;
 				return(token);
@@ -181,7 +223,7 @@ Token proximo_token(){
 				cont_sim_lido++;
 				printf("<relop, EQ>\n");
 				token.nome_token = RELOP;
-				token.atributo = EQ;
+				token.atributo = to_string(EQ);
 				estado = 0;
 				return(token);
 				break;
@@ -204,7 +246,7 @@ Token proximo_token(){
 				cont_sim_lido++;
 				printf("<relop, NE>\n");
 				token.nome_token = RELOP;
-				token.atributo = NE;
+				token.atributo = to_string(NE);
 				estado = 0;
 				return(token);
 				break;
@@ -221,10 +263,9 @@ Token proximo_token(){
 				else estado = 10;
 				break;   
 			case 10:
-				cont_sim_lido++;
 				printf("<relop, GT>\n");
 				token.nome_token = RELOP;
-				token.atributo = GT;
+				token.atributo = to_string(GT);
 				estado = 0;
 				return(token);
 				break;
@@ -232,7 +273,7 @@ Token proximo_token(){
 				cont_sim_lido++;
 				printf("<relop, GE>\n");
 				token.nome_token = RELOP;
-				token.atributo = GE;
+				token.atributo = to_string(GE);
 				estado = 0;
 				return(token);
 				break;
@@ -280,7 +321,7 @@ Token proximo_token(){
 					tabela.push_back(identifier);			// Coloca o identificador na tabela
 					printf("<ID, %d>\n", count_tabela);		// Exibe o token na tela
 					token.nome_token = ID;				
-					token.atributo = count_tabela;
+					token.atributo = to_string(count_tabela);
 					count_tabela++;							// Incrementa a variável que controla quantidade de identificadores
 				}
 				identifier = "";							// Retorna a variável que guarda identificador para valor vazio
@@ -297,7 +338,7 @@ Token proximo_token(){
 					numeral += c;
 					estado = 16;
 				}else{
-					falhar();
+					estado = falhar();
 				}
 				break;
 			case 16:
@@ -312,7 +353,7 @@ Token proximo_token(){
 			case 17:
 				printf("<numero, %s>\n", numeral.c_str());
 				token.nome_token = NUM;
-				token.atributo = stoi(numeral);
+				token.atributo = numeral;
 				numeral = "";
 				estado = 0;
 				return(token);
@@ -327,11 +368,17 @@ Token proximo_token(){
 				break;
 			case 19:
 				cont_sim_lido++;
-				printf("<-, >\n");
-				token.nome_token = SUBT;
-				token.atributo = ' ';
-				estado = 0;
-				return(token);
+				if(c == '-'){
+					estado = 0;
+					estado = falhar();
+					cont_sim_lido--;
+				}else{
+					printf("<-, >\n");
+					token.nome_token = SUBT;
+					token.atributo = ' ';
+					estado = 0;
+					return(token);
+				}
 				break;
 			case 20:
 				cont_sim_lido++;
@@ -353,6 +400,98 @@ Token proximo_token(){
 				cont_sim_lido++;
 				printf("<^, >\n");
 				token.nome_token = POW;
+				token.atributo = ' ';
+				estado = 0;
+				return(token);
+				break;
+				
+			case 23:
+				c = code[cont_sim_lido];
+				if((c == ' ')||(c == '\n')){
+					estado = 0;
+					cont_sim_lido++;
+				}
+				if(c == '\"'){
+					estado = 24;
+				}else{
+					estado = falhar();
+				}
+				break;	
+
+			case 24:
+				cont_sim_lido++;
+				c = code[cont_sim_lido];
+				
+				if(c == '\\'){
+					estado = 25;
+				}else if(c == '\"'){
+					cont_sim_lido++;
+					estado = 26;
+				}
+				literal += c;
+				break;
+
+			case 25:
+				cont_sim_lido++;
+				c = code[cont_sim_lido];
+				literal += c;
+				estado = 24;
+				break;
+			case 26:
+				printf("<literal, \"%s>\n", literal.c_str());
+				token.nome_token = LIT;
+				token.atributo = literal;
+				literal = "";
+				estado = 0;
+				return(token);
+				break;
+			case 27:
+				c = code[cont_sim_lido];
+				if(c == '-'){
+					cont_sim_lido++;
+					c = code[cont_sim_lido];
+					if(c == '-'){
+						cont_sim_lido++;
+						estado = 28;
+					}else{
+						printf("Erro no comentario\n");
+					}
+				}else{
+					estado = falhar();
+				}
+				break;
+			case 28:
+				c = code[cont_sim_lido];
+				if(c = '['){
+					cont_sim_lido++;
+					c = code[cont_sim_lido];
+					if(c == '['){
+						estado = 30;
+					}
+				}else{
+					cont_sim_lido++;
+				}
+				if(c == '-'){
+					cont_sim_lido++;
+					c = code[cont_sim_lido];
+					if(c == '-'){
+						cont_sim_lido++;
+						estado = 29;
+					}else{
+						printf("Erro no comentario\n");
+					}
+				}else{
+
+				}
+				break;
+			case 29:
+				break;
+			case 30:
+				break;
+			case 31:
+				cont_sim_lido++;
+				printf("<+, >\n");
+				token.nome_token = PLUS;
 				token.atributo = ' ';
 				estado = 0;
 				return(token);
