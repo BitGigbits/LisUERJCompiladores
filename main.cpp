@@ -122,10 +122,6 @@ void get_nome_token(char c, Token &token, int &cont){
 	tokens.push_back(token);
 }
 
-void imprime_tokens(){
-	exit(1);
-}
-
 int falhar(){
 	// Função falhar para trocar de máquina
 	switch(estado){
@@ -154,10 +150,12 @@ int falhar(){
 	return(partida);
 }
 
-Token proximo_token(){
+Token gera_token(){
 	Token token;
 	char c;
 	while(code[cont_sim_lido] != '\0'){
+		// cout << "Estado: " << estado << endl;
+		// cout << "Caractere: " << code[cont_sim_lido] << endl;
 		switch(estado){
 			case 0:
 				c = code[cont_sim_lido];
@@ -245,6 +243,7 @@ Token proximo_token(){
 					estado = 8;
 				}else{
 					printf("Erro, nao ha caractere valido apos o ~\n");
+					exit(4);
 				}
 				break;    
 			case 8:
@@ -402,6 +401,7 @@ Token proximo_token(){
 				break;
 			case 20:
 				cont_sim_lido++;
+				c = code[cont_sim_lido];
 				if(c == '-'){
 					estado = 28;
 					cont_sim_lido--;
@@ -451,7 +451,7 @@ Token proximo_token(){
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
 				literal += c;
-				estado = 24;
+				estado = 25;
 				break;
 			case 27:
 				printf("<literal, %s> ", literal.c_str());
@@ -501,7 +501,7 @@ Token proximo_token(){
 					}
 				}
 
-				if(c == '\n' && cont_colchete == 0){
+				if((c == '\n' || c == ' ') && cont_colchete == 0){
 					cont_sim_lido++;
 					estado = 0;
 				}else{
@@ -613,7 +613,7 @@ int main (){
 			printf("\n");
 			j = 0;
 		}
-		token = proximo_token();
+		token = gera_token();
 		j++;
 	}
 
