@@ -69,6 +69,7 @@ int estado = 0;
 int partida = 0;
 int cont_sim_lido = 0;
 int cont_colchete = 0;
+int cont_integer = 0;
 bool is_res = false;
 bool var_exist = false;
 unsigned int i = 0;
@@ -89,19 +90,19 @@ string literal = "";
 // Função leitura, não estávamos conseguindo executar a anterior então recriamos
 void readFile(){
 	string nomeArquivo = "programa.txt";
-    ifstream arquivo(nomeArquivo);
+	ifstream arquivo(nomeArquivo);
 
-    if (!arquivo.is_open()){
-        cout << "Nao foi possivel abrir o arquivo: " << nomeArquivo << "\n";
-    }
-
-    string linha;
-
-    while (getline(arquivo, linha)) {
-        code += linha + '\n';
-    }
-
-    arquivo.close();
+	if (!arquivo.is_open()){
+		cout << "Nao foi possivel abrir o arquivo: " << nomeArquivo << "\n";
+	}
+	
+	string linha;
+	
+	while (getline(arquivo, linha)) {
+		code += linha + '\n';
+	}
+	
+	arquivo.close();
 }
 
 // Função para evitar repetição e linhas extras quando se cria um token de alguns operadores
@@ -126,12 +127,13 @@ void imprime_tokens(){
 }
 
 int falhar(){
+	// Função falhar para trocar de máquina
 	switch(estado){
 
 		case 0: partida = 12; break;
 
 		case 12: partida = 15; break;
-		
+
 		case 15: partida = 18; break;
 
 		case 18: partida = 24; break;
@@ -139,11 +141,14 @@ int falhar(){
 		case 24: partida = 31; break;
 
 		case 31:
-			printf("Erro no código.\n");
-			partida = -1;
+			printf("Erro no codigo introduzido, provavelmente de simbolo nao existente.\n");
+			exit(3);
 			break;
 
-		default: printf("Erro do compilador");
+		default: 
+			printf("Erro do compilador");
+			exit(1);
+			break;
 	}
 
 	return(partida);
@@ -197,7 +202,7 @@ Token proximo_token(){
 				tokens.push_back(token);
 				return(token);
 				break;
-            case 4:
+			case 4:
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
 
@@ -227,7 +232,7 @@ Token proximo_token(){
 				tokens.push_back(token);
 				return(token);
 				break;
-            case 7:
+			case 7:
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
 
@@ -251,7 +256,7 @@ Token proximo_token(){
 				tokens.push_back(token);
 				return(token);
 				break;
-            case 9:
+			case 9:
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
 
@@ -298,7 +303,7 @@ Token proximo_token(){
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
 
-                if(isalpha(c) || isdigit(c) || c == '_' ){
+				if(isalpha(c) || isdigit(c) || c == '_' ){
 					identifier += c;
 					estado = 13;
 				}else{
@@ -306,7 +311,7 @@ Token proximo_token(){
 				}
 
 				break;
-            case 14:
+			case 14:
 				is_res = false;
 				i = 0;
 				for(; i < reservados.size(); i++){
@@ -352,6 +357,7 @@ Token proximo_token(){
 				}
 				if(isdigit(c)){
 					numeral += c;
+					cont_integer++;
 					estado = 16;
 				}else{
 					estado = falhar();
@@ -360,9 +366,14 @@ Token proximo_token(){
 			case 16:
 				cont_sim_lido++;
 				c = code[cont_sim_lido];
-				if(isdigit(c)){
+				if(isdigit(c) && cont_integer < 10){
+					cont_integer++;
 					numeral += c;
 				}else{
+					if(cont_integer == 10){
+						printf("Erro, estouro do limite do numero.\n");
+						exit(1);
+					}
 					estado = 17;
 				}
 				break;
@@ -371,6 +382,7 @@ Token proximo_token(){
 				token.nome_token = NUM;
 				token.atributo = numeral;
 				numeral = "";
+				cont_integer = 0;
 				estado = 0;
 				tokens.push_back(token);
 				return(token);
@@ -596,13 +608,17 @@ int main (){
 	Token token;
 	readFile();
 	int j = 0;
-    while(code[cont_sim_lido] != '\0'){
+	while(code[cont_sim_lido] != '\0'){
 		if(j == 3){
 			printf("\n");
 			j = 0;
 		}
 		token = proximo_token();
 		j++;
+	}
+
+	if(cont_colchete > 0){
+		printf(" Erro! Comentario nao fechado.\n");
 	}
 
 	return 0;
