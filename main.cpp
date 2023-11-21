@@ -64,6 +64,11 @@ struct Token{
  string atributo;
 };
 
+struct Token2{
+	int atributor;
+	string atributoorrr;
+};
+
 // Variáveis para controle dos estados
 int estado = 0;
 int partida = 0;
