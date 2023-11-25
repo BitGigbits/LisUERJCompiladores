@@ -27,7 +27,8 @@ Exp => Exp BinOp Exp
     |   Number
     |   String
 
-PrefixExp => Var
+PrefixExp => Name
+    |   PrefixExp [Exp]
     |   (Exp)
 
 Field => [Epx] = Exp               
@@ -46,4 +47,4 @@ FunctionBody => Name (Params opt) Block end
 
 Params => Names
 
-Nanes => Name (, Name)*
+Names => Name (, Name)*
