@@ -1,4 +1,1 @@
-if a > b and 8 > 10 then
-    mouse = "oi tudo bem"
-else
-    id = 5"
+()

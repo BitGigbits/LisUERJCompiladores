@@ -70,6 +70,7 @@ int partida = 0;
 int cont_sim_lido = 0;
 int cont_colchete = 0;
 int cont_integer = 0;
+int cont_tokens = 0;
 bool is_res = false;
 bool var_exist = false;
 unsigned int i = 0;
@@ -87,7 +88,18 @@ string identifier = "";
 string numeral = "";
 string literal = "";
 
-// Função leitura, não estávamos conseguindo executar a anterior então recriamos
+void erro(int erro_id){
+	if(erro_id == 1){
+		cout << "teste";
+	}
+}
+
+void block(){
+	if(tokens[cont_tokens].atributo == "("){
+		//stmt();
+	}
+}
+
 void readFile(){
 	string nomeArquivo = "programa.txt";
 	ifstream arquivo(nomeArquivo);
@@ -605,7 +617,6 @@ Token gera_token(){
 }
 
 int main (){
-	Token token;
 	readFile();
 	int j = 0;
 	while(code[cont_sim_lido] != '\0'){
@@ -613,7 +624,9 @@ int main (){
 			printf("\n");
 			j = 0;
 		}
-		token = gera_token();
+		gera_token();
+		//block();
+		cont_tokens++;
 		j++;
 	}
 
