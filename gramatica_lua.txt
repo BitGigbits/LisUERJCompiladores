@@ -1,0 +1,49 @@
+
+Block => (Stmt;)*
+
+Stmt => Vars = Exps
+    |   Function
+    |   do Block end
+    |   while Exp do BLock end
+    |   if Exp then Block (elseif Exp then Block)* (else Block)opt end
+    |   return Exps opt
+    |   break
+    |   for Name = Exp , Exp (, Exp)opt do Block end
+    |   for Names in Exps do Block end
+    |   local opt function Name FunctionBody
+    |   local Names = Exps
+
+Exps => Exp (,Exp)*
+
+Exp => Exp BinOp Exp
+    |   not Exp
+    |   - Exp
+    |   PrefixExp
+    |   Function
+    |   {(Field(, Field)*)opt}
+    |   nil
+    |   true
+    |   false
+    |   Number
+    |   String
+
+PrefixExp => Var
+    |   (Exp)
+
+Field => [Epx] = Exp               
+    |   Name = Exp
+
+BinOp => or | and | < | > | <= | >= | ~= | == | . . | + | - | * | / | ^ |
+
+Vars => Var (,Var)*
+
+Var => Name
+    |   PrefixExp [Exp]
+
+Function => Function FunctionBody
+
+FunctionBody => Name (Params opt) Block end
+
+Params => Names
+
+Nanes => Name (, Name)*
