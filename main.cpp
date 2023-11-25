@@ -70,11 +70,12 @@ int partida = 0;
 int cont_sim_lido = 0;
 int cont_colchete = 0;
 int cont_integer = 0;
-int cont_tokens = 0;
+int cont_linhas = 0;
 bool is_res = false;
 bool var_exist = false;
 unsigned int i = 0;
 string code;
+Token tok;
 
 // Vector que guarda as palavras reservadas, tabela de símbolos e tokens
 vector<string> reservados = {"and", "break", "do", "else", "elseif", "end", "false", "for", "function",
@@ -87,18 +88,6 @@ vector<Token> tokens;
 string identifier = "";
 string numeral = "";
 string literal = "";
-
-void erro(int erro_id){
-	if(erro_id == 1){
-		cout << "teste";
-	}
-}
-
-void block(){
-	if(tokens[cont_tokens].atributo == "("){
-		//stmt();
-	}
-}
 
 void readFile(){
 	string nomeArquivo = "programa.txt";
@@ -120,12 +109,8 @@ void readFile(){
 // Função para evitar repetição e linhas extras quando se cria um token de alguns operadores
 void get_nome_token(char c, Token &token, int &cont){
 	if(estado == 42){
-		printf("<%c., > ", c);
 		token.nome_token = DOUBLEDOT;	// Pega o  código ASCII e guarda
-	}else if(estado == 40){
-		printf("<%c , > ", c);
 	}else{
-		printf("<%c, > ", c);
 		token.nome_token = (int)c;	// Pega o  código ASCII e guarda
 	}
 	token.atributo = ' ';
@@ -617,17 +602,12 @@ Token gera_token(){
 }
 
 int main (){
+
+	void erro(), block(), Stmt();
+
 	readFile();
-	int j = 0;
 	while(code[cont_sim_lido] != '\0'){
-		if(j == 3){
-			printf("\n");
-			j = 0;
-		}
-		gera_token();
-		//block();
-		cont_tokens++;
-		j++;
+		block();
 	}
 
 	if(cont_colchete > 0){
@@ -635,4 +615,53 @@ int main (){
 	}
 
 	return 0;
+}
+
+void erro(int erro_id){
+	switch (erro_id){
+	case 1:
+		cout << "Erro de início do bloco.";
+		break;
+	case 2:
+		cout << "Erro no fechamento de statement, faltou ponto e virgula.";
+		break;
+	case 3:
+		cout << "Erro no fechamento do bloco.";
+		break;
+	default:
+		break;
+	}
+	exit(erro_id);
+}
+
+void block(){
+	void Stmt();
+begin:
+	tok = gera_token();
+	if(code[cont_sim_lido] == '\0'){
+		exit(0);
+	}
+	if(tok.nome_token == 40){
+		cout << "( "; // 40 é o ascii do (
+		tok = gera_token();
+		Stmt();
+		if(tok.nome_token == 59){ // 59 é o ascii do ;
+			tok = gera_token();
+			cout << ";";
+			if(tok.nome_token == 41){ // 41 é o ascii do )
+				cout << " )";
+				goto begin;
+			}else{
+				erro(3);
+			}
+		}else{
+			erro(2);
+		}
+	}else{
+		erro(1);
+	}
+}
+
+void Stmt(){
+	return;
 }
