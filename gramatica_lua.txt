@@ -8,15 +8,20 @@ Stmt => Vars = Exps
     |   if Exp then Block (elseif Exp then Block)* (else Block)opt end
     |   return Exps opt
     |   break
-    |   for Name = Exp , Exp (, Exp)opt do Block end
-    |   for Names in Exps do Block end
-    |   local opt function Name FunctionBody
-    |   local Names = Exps
+    |   for Stmt1
+    |   local Stmt2
+
+
+Stmt1 => Name = Exp , Exp (, Exp)opt do Block end
+    |    Names in Exps do Block end
+
+Stmt2 =>
+    |   opt function Name FunctionBody
+    |   Names = Exps
 
 Exps => Exp (,Exp)*
 
-Exp => Exp BinOp Exp
-    |   not Exp
+Exp => not Exp
     |   - Exp
     |   PrefixExp
     |   Function
@@ -27,21 +32,56 @@ Exp => Exp BinOp Exp
     |   Number
     |   String
 
+    |   not Exp Exp'
+    |   - Exp Exp'
+    |   PrefixExp Exp'
+    |   Function Exp'
+    |   {(Field(, Field)*)opt} Exp'
+    |   nil Exp'
+    |   true Exp'
+    |   false Exp'
+    |   Number Exp'
+    |   String Exp'
+
+Exp' => BinOp Exp
+    |   BinOp Exp Exp' 
+
 PrefixExp => Name
-    |   PrefixExp [Exp]
     |   (Exp)
+    |   Name PrefixExp'
+    |   (Exp) PrefixExp'
+
+PrefixExp' =>  [Exp]
+    | [Exp] PrefixExp'
+
+
 
 Field => [Epx] = Exp               
     |   Name = Exp
 
-BinOp => or | and | < | > | <= | >= | ~= | == | . . | + | - | * | / | ^ |
+BinOp => or 
+    | and 
+    | < BinOp'
+    | > BinOp'
+    | ~= 
+    | == 
+    | . . 
+    | + 
+    | - 
+    | * 
+    | / 
+    | ^ 
+
+BinOp' => = | ""    
 
 Vars => Var (,Var)*
 
 Var => Name
     |   PrefixExp [Exp]
 
-Function => Function FunctionBody
+Function => FunctionBody
+    |   FunctionBody Function
+
 
 FunctionBody => Name (Params opt) Block end
 
