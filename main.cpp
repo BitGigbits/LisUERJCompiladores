@@ -604,6 +604,7 @@ Token gera_token(){
 int main (){
 
 	void erro(), block(), Stmt();
+	void Exps(), Exp(), Vars();
 
 	readFile();
 	while(code[cont_sim_lido] != '\0'){
@@ -628,14 +629,65 @@ void erro(int erro_id){
 	case 3:
 		cout << "Erro no fechamento do bloco.";
 		break;
+	case 4:
+		cout << "Erro na atribuicao.";
+		break;
 	default:
 		break;
 	}
 	exit(erro_id);
 }
 
+void Vars(){
+	return;
+}
+
+void Exp(){
+	return;
+}
+
+void Exps(){
+	return;
+}
+
+void Stmt(){
+	void block();
+	if(tok.nome_token == 277){ // 277 é o ID
+		tok = gera_token();
+		Vars();
+		if(tok.nome_token == 292){ // 292 é = para atribuição
+			cout << "= ";
+			tok = gera_token();
+			Exps();
+		}else{
+			erro(4);
+		}
+	}else if(tok.nome_token == 258){ // 258 é o código do do
+		cout << "do ";
+		tok = gera_token();
+		block();
+		if(tok.nome_token == 261){ // 261 é o código do end
+			cout << "end ";
+			tok = gera_token();
+		}
+	}else if(tok.nome_token == 276){ // 276 código do while
+		cout << "while ";
+		tok = gera_token();
+		Exp();
+		if(tok.nome_token == 258){ // 258 é o código do do
+			cout << "do ";
+			tok = gera_token();
+			block();
+			tok = gera_token();
+			if(tok.nome_token == 261){ // 261 é o código do end
+				cout << "end ";
+				tok = gera_token();
+			}
+		}
+	}
+}
+
 void block(){
-	void Stmt();
 begin:
 	tok = gera_token();
 	if(code[cont_sim_lido] == '\0'){
@@ -660,8 +712,4 @@ begin:
 	}else{
 		erro(1);
 	}
-}
-
-void Stmt(){
-	return;
 }
