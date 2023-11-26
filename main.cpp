@@ -638,8 +638,21 @@ void erro(int erro_id){
 	exit(erro_id);
 }
 
-void Vars(){
+void Var(){
+	tok = gera_token();
+	cout << tabela[stoi(tok.atributo)];
 	return;
+}
+
+void Vars(){
+	Var();
+Verifica_Var:
+	tok = gera_token();
+	if(tok.nome_token == 44){
+		cout << ", ";
+		Var();
+		goto Verifica_Var;
+	}
 }
 
 void Exp(){
@@ -647,13 +660,17 @@ void Exp(){
 }
 
 void Exps(){
-	return;
+	Exp();
+	tok = gera_token();
+	if(tok.nome_token == 40){
+		cout << "( ";
+	}
 }
 
 void Stmt(){
 	void block();
+	tok = gera_token();
 	if(tok.nome_token == 277){ // 277 é o ID
-		tok = gera_token();
 		Vars();
 		if(tok.nome_token == 292){ // 292 é = para atribuição
 			cout << "= ";
@@ -668,7 +685,6 @@ void Stmt(){
 		block();
 		if(tok.nome_token == 261){ // 261 é o código do end
 			cout << "end ";
-			tok = gera_token();
 		}
 	}else if(tok.nome_token == 276){ // 276 código do while
 		cout << "while ";
@@ -681,7 +697,6 @@ void Stmt(){
 			tok = gera_token();
 			if(tok.nome_token == 261){ // 261 é o código do end
 				cout << "end ";
-				tok = gera_token();
 			}
 		}
 	}
@@ -695,11 +710,11 @@ begin:
 	}
 	if(tok.nome_token == 40){
 		cout << "( "; // 40 é o ascii do (
-		tok = gera_token();
 		Stmt();
+		tok = gera_token();
 		if(tok.nome_token == 59){ // 59 é o ascii do ;
-			tok = gera_token();
 			cout << ";";
+			tok = gera_token();
 			if(tok.nome_token == 41){ // 41 é o ascii do )
 				cout << " )";
 				goto begin;
