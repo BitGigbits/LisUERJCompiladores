@@ -5,19 +5,27 @@ Stmt => Vars = Exps
     |   Function
     |   do Block end
     |   while Exp do BLock end
-    |   if Exp then Block (elseif Exp then Block)* (else Block)opt end
-    |   return Exps opt
+    |   if Exp then Block (elseif Exp then Block)* Stmt' end  
+    |   return Stmt3
     |   break
     |   for Stmt1
     |   local Stmt2
+    |   function Name FunctionBody
 
+Stmt' => (else Block)
+    | VAZIO
 
-Stmt1 => Name = Exp , Exp (, Exp)opt do Block end
-    |    Names in Exps do Block end
+Stmt1 => Name = Exp , Exp Stmt1' do Block end
+    |   Names in Exps do Block end
 
-Stmt2 =>
-    |   opt function Name FunctionBody
+Stmt1' => (, Exp)
+    | VAZIO
+
+Stmt2 => function Name FunctionBody
     |   Names = Exps
+
+Stmt3 => Exps
+    |   VAZIO
 
 Exps => Exp (,Exp)*
 
@@ -25,7 +33,7 @@ Exp => not Exp
     |   - Exp
     |   PrefixExp
     |   Function
-    |   {(Field(, Field)*)opt}
+    |   {T}
     |   nil
     |   true
     |   false
@@ -36,12 +44,16 @@ Exp => not Exp
     |   - Exp Exp'
     |   PrefixExp Exp'
     |   Function Exp'
-    |   {(Field(, Field)*)opt} Exp'
+    |   {T} Exp'
+ 
     |   nil Exp'
     |   true Exp'
     |   false Exp'
     |   Number Exp'
     |   String Exp'
+
+ T => (Field(, Field)*) 
+    | VAZIO
 
 Exp' => BinOp Exp
     |   BinOp Exp Exp' 
@@ -72,7 +84,7 @@ BinOp => or
     | / 
     | ^ 
 
-BinOp' => = | ""    
+BinOp' => = | VAZIO    
 
 Vars => Var (,Var)*
 
@@ -83,7 +95,9 @@ Function => FunctionBody
     |   FunctionBody Function
 
 
-FunctionBody => Name (Params opt) Block end
+FunctionBody => Name (Params') Block end
+Params' => Params | VAZIO
+
 
 Params => Names
 
