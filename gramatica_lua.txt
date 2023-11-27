@@ -1,22 +1,16 @@
 
-Block => Estrela0
-
-Estrela0 => Stmt; Estrela0
-    |   VAZIO
+Block => (Stmt;)*
 
 Stmt => Vars = Exps
     |   Function
     |   do Block end
     |   while Exp do BLock end
-    |   if Exp then Block Estrela1 Stmt' end  
+    |   if Exp then Block (elseif Exp then Block)* Stmt' end  
     |   return Stmt3
     |   break
     |   for Stmt1
     |   local Stmt2
     |   function Name FunctionBody
-
-Estrela1 => elseif Exp then Block Estrela1
-    | VAZIO
 
 Stmt' => (else Block)
     | VAZIO
@@ -33,10 +27,7 @@ Stmt2 => function Name FunctionBody
 Stmt3 => Exps
     |   VAZIO
 
-Exps => Exp Estrela2
-
-Estrela2 => ,Exp Estrela2
-    |   VAZIO
+Exps => Exp (,Exp)*
 
 Exp => not Exp Exp'
     |   - Exp Exp'
@@ -49,11 +40,8 @@ Exp => not Exp Exp'
     |   Number Exp'
     |   String Exp'
 
- T => (Field Estrela3) 
+T => (Field(, Field)*) 
     | VAZIO
-
-Estrela3 => , Field Estrela3
-    |   VAZIO
 
 Exp' =>  BinOp Exp Exp' 
     |   VAZIO
@@ -84,10 +72,7 @@ BinOp => or
 
 BinOp' => = | VAZIO    
 
-Vars => Var Estrela4
-
-Estrela4 => ,Var Estrela4
-    |   VAZIO
+Vars => Var (,Var)*
 
 Var => Name
     |   PrefixExp [Exp]
@@ -101,7 +86,4 @@ Params' => Params | VAZIO
 
 Params => Names
 
-Names => Name Estrela5
-
-Estrela5 => , Name Estrela5
-    |   VAZIO
+Names => Name (, Name)*

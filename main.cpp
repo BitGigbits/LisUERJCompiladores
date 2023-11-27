@@ -630,6 +630,9 @@ void erro(int erro_id){
 	case 8:
 		cout << " Talvez deveria existir um \"in\" por aqui?";
 		break;
+	case 9:
+		cout << " Erro na declaracao do local";
+		break;
 	default:
 		break;
 	}
@@ -744,6 +747,8 @@ void Stmt2(){
 		}else{
 			erro(2);
 		}
+	}else{
+		erro(9);
 	}
 }
 
