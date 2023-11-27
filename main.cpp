@@ -653,7 +653,11 @@ void erro(int erro_id){
 
 void Var(){
 	tok = gera_token();
-	cout << tabela[stoi(tok.atributo)] << " ";
+	if(tok.nome_token == ID){
+		cout << tabela[stoi(tok.atributo)] << " ";
+	}else if(){
+		
+	}
 	return;
 }
 
@@ -661,7 +665,7 @@ void Vars(){
 	Var();
 Verifica_Var:
 	tok = gera_token();
-	if(tok.nome_token == 44){
+	if(tok.nome_token == 44){			// Código da virgula
 		cout << ", ";
 		Var();
 		goto Verifica_Var;
@@ -755,7 +759,16 @@ void BinOp(){
 }
 
 void PrefixExp_(){
-	return;
+	if(tok.nome_token == 91){		// Código do [
+		cout << "[ ";
+		Exp();
+		tok = gera_token();
+		if(tok.nome_token == 93){
+			cout << "]";
+			tok = gera_token();
+			PrefixExp_();
+		}
+	}
 }
 
 void PrefixExp(){

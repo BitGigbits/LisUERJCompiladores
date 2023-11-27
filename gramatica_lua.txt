@@ -46,13 +46,16 @@ T => Field(, Field)*
 Exp' =>  BinOp Exp Exp' 
     |   VAZIO
 
-PrefixExp => Name
-    |   (Exp)
-    |   Name PrefixExp'
+PrefixExp => Name PrefixExp'
     |   (Exp) PrefixExp'
 
-PrefixExp' =>  [Exp]
-    | [Exp] PrefixExp'
+PrefixExp' =>  [Exp] PrefixExp'
+    |   VAZIO
+
+Vars => Var (,Var)*
+
+Var => Name
+    |   PrefixExp [Exp]
 
 Field => [Epx] = Exp               
     |   Name = Exp
@@ -71,11 +74,6 @@ BinOp => or
     | ^ 
 
 BinOp' => = | VAZIO    
-
-Vars => Var (,Var)*
-
-Var => Name
-    |   PrefixExp [Exp]
 
 Function => FunctionBody
     |   FunctionBody Function
