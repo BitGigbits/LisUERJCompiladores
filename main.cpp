@@ -653,7 +653,7 @@ void erro(int erro_id){
 
 void Var(){
 	tok = gera_token();
-	cout << tabela[stoi(tok.atributo)];
+	cout << tabela[stoi(tok.atributo)] << " ";
 	return;
 }
 
@@ -666,14 +666,6 @@ Verifica_Var:
 		Var();
 		goto Verifica_Var;
 	}
-}
-
-void Function(){
-	return;
-}
-
-void PrefixExp(){
-	return;
 }
 
 void Field(){
@@ -762,6 +754,30 @@ void BinOp(){
 	}
 }
 
+void PrefixExp_(){
+	return;
+}
+
+void PrefixExp(){
+	int index = cont_sim_lido;
+	Token guarda_token_anterior = tok;
+
+	if(tok.nome_token == ID){
+		cout << tabela[stoi(tok.atributo)] << " ";
+		tok = gera_token();
+		if(tok.nome_token == 91){
+			PrefixExp_();
+		}else{
+			cont_sim_lido = index;
+			tok = guarda_token_anterior;
+		}
+	}else if(tok.nome_token == 40){
+		cout << "(";
+		tok = gera_token();
+		PrefixExp_();
+	}
+}
+
 void Exp_(){
 	tok = gera_token();
 	if(tok.nome_token == RELOP || (tok.nome_token >= PLUS && tok.nome_token <= DOUBLEDOT)
@@ -782,8 +798,12 @@ void Exp(){
 		cout << "- ";
 		Exp();
 		Exp_();
+	}else if(tok.nome_token == ID || tok.nome_token == 40){ // Código do (
+		PrefixExp();
+		Exp_();
 	}else if(tok.nome_token == FUNCTION){ // Código da function
-		Function();
+		cout << "function ";
+		FunctionBody();
 		Exp_();
 	}else if(tok.nome_token == 123){ // Código da {
 		cout << "{";
@@ -870,7 +890,11 @@ void Stmt2(){
 }
 
 void Stmt1_(){
-	return;
+	if(tok.nome_token == 44){ // Código da virgula
+		cout << ", ";
+		Exp();
+		tok = gera_token();
+	}
 }
 
 void Names(){
@@ -900,8 +924,8 @@ void Stmt1(){
 			if(tok.nome_token == 44){ // Código da vírgula
 				cout << ", ";
 				Exp();
-				Stmt1_();
 				tok = gera_token();
+				Stmt1_();
 				if(tok.nome_token == DO){
 					cout << "do ";
 					block();
@@ -1010,6 +1034,15 @@ void Stmt(){
 	}else if(tok.nome_token == LOCAL){
 		cout << "local ";
 		Stmt2();
+	}else if(tok.nome_token == FUNCTION){
+		cout << "function ";
+		tok = gera_token();
+		if(tok.nome_token == ID){
+			cout << tabela[stoi(tok.atributo)] << " ";
+			FunctionBody();
+		}else{
+			erro(10);
+		}
 	}
 }
 
