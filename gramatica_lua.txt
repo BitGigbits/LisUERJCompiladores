@@ -40,7 +40,7 @@ Exp => not Exp Exp'
     |   Number Exp'
     |   String Exp'
 
-T => (Field(, Field)*) 
+T => Field(, Field)* 
     | VAZIO
 
 Exp' =>  BinOp Exp Exp' 
@@ -80,10 +80,8 @@ Var => Name
 Function => FunctionBody
     |   FunctionBody Function
 
-FunctionBody => Name (Params') Block end
+FunctionBody => Name (Params) Block end
 
-Params' => Params | VAZIO
-
-Params => Names
+Params => Names | VAZIO
 
 Names => Name (, Name)*

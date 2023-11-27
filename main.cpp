@@ -621,17 +621,29 @@ void erro(int erro_id){
 	case 4:
 		cout << " Faltou um end aqui";
 		break;
+	case 5:
+		cout << " Erro na definicao da expressao";
+		break;
 	case 6:
 		cout << " Sem variavel para iniciar o for";
 		break;
 	case 7:
-		cout << " Erro, voce queria adicionar mais aluma variavel?";
+		cout << " Erro, voce queria adicionar mais alguma variavel?";
 		break;
 	case 8:
 		cout << " Talvez deveria existir um \"in\" por aqui?";
 		break;
 	case 9:
 		cout << " Erro na declaracao do local";
+		break;
+	case 10:
+		cout << " Faltou o nome da funcao";
+		break;
+	case 11:
+		cout << " Erro na logica de operacoes";
+		break;
+	case 12:
+		cout << " Erro no fechamento do colchetes";
 		break;
 	default:
 		break;
@@ -664,17 +676,100 @@ void PrefixExp(){
 	return;
 }
 
-void BinOp(){
-	return;
+void Field(){
+	if(tok.nome_token == 91){ // Codigo do [	
+		cout << "[";
+		Exp();
+		tok = gera_token();
+		if(tok.nome_token == 93){ // Codigo do ]
+			cout << "]";
+			tok = gera_token();
+			if(tok.nome_token == ATR){
+				cout << "= ";
+				Exp();
+			}
+		}else{
+			erro(12);
+		}
+	}else if(tok.nome_token == ID){
+		cout << tabela[stoi(tok.atributo)] << " ";
+		tok = gera_token();
+		if(tok.nome_token == ATR){
+			cout << "= ";
+			Exp();
+		}else{
+			erro(2);
+		}
+	}
 }
 
 void T(){
-	return;
+	tok = gera_token();
+	if(tok.nome_token == 91 || tok.nome_token == ID){ // 91 é código do [
+		Field();
+		tok = gera_token();
+		if(tok.nome_token == 44){
+			cout << ", ";
+			Field();
+		}
+	}
+}
+
+void BinOp_(){
+	int index = cont_sim_lido;
+	Token guarda_token_anterior = tok;
+
+	tok = gera_token();
+
+	if(tok.nome_token == ATR){
+		cout << "= ";
+	}else{
+		cout << " ";
+		cont_sim_lido = index;
+		tok = guarda_token_anterior;
+	}
+}
+
+void BinOp(){
+	if(tok.nome_token == OR){
+		cout << "or ";
+	}else if(tok.nome_token == AND){
+		cout << "and ";
+	}else if(tok.atributo == to_string(LT)){
+		cout << "<";
+		BinOp_();
+	}else if(tok.atributo == to_string(GT)){
+		cout << ">";
+		BinOp_();
+	}else if(tok.atributo == to_string(NE)){
+		cout << "~= ";
+	}else if(tok.atributo == to_string(EQ)){
+		cout << "== ";
+	}else if(tok.nome_token == DOUBLEDOT){
+		cout << ".. ";
+	}else if(tok.nome_token == PLUS){
+		cout << "+ ";
+	}else if(tok.nome_token == SUBT){
+		cout << "- ";
+	}else if(tok.nome_token == MULT){
+		cout << "* ";
+	}else if(tok.nome_token == DIV){
+		cout << "/ ";
+	}else if(tok.nome_token == POW){
+		cout << "^ ";
+	}else{
+		erro(11);
+	}
 }
 
 void Exp_(){
 	tok = gera_token();
-	BinOp();
+	if(tok.nome_token == RELOP || (tok.nome_token >= PLUS && tok.nome_token <= DOUBLEDOT)
+		|| tok.nome_token == OR || tok.nome_token == AND){
+		BinOp();
+		Exp();
+		Exp_();
+	}
 }
 
 void Exp(){
@@ -691,7 +786,9 @@ void Exp(){
 		Function();
 		Exp_();
 	}else if(tok.nome_token == 123){ // Código da {
+		cout << "{";
 		T();
+		Exp_();
 	}else if(tok.nome_token == NIL){ // Código do NIL
 		cout << "nil ";
 		Exp_();
@@ -727,8 +824,25 @@ void Stmt3(){
 	return;
 }
 
+void Params(){
+	tok = gera_token();
+	if(tok.nome_token == ID){
+		Names();
+	}
+}
+
 void FunctionBody(){
-	return;
+	tok = gera_token();
+	if(tok.nome_token == ID){
+		cout << tabela[stoi(tok.atributo)] << " ";
+		tok = gera_token();
+		if(tok.nome_token == 40){
+			cout << "(";
+			Params();						// Já volta com novo token gerado caso vazio
+		}
+	}else{
+		erro(10);
+	}
 }
 
 void Stmt2(){
@@ -737,10 +851,13 @@ void Stmt2(){
 		cout << "function ";
 		tok = gera_token();
 		if(tok.nome_token == ID){
+			cout << tabela[stoi(tok.atributo)] << " ";
 			FunctionBody();
+		}else{
+			erro(10);
 		}
 	}else if(tok.nome_token == ID){
-		Names();
+		Names();							// Names() já printa a variável que entrou nela
 		if(tok.nome_token == ATR){
 			cout << "= ";
 			Exps();
