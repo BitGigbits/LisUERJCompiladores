@@ -312,13 +312,11 @@ Token gera_token(){
 					}
 				}
 				if(is_res){
-					printf("<%s, > ", identifier.c_str());	// Exibe o token da palavra reservada
 					token.nome_token = i + 256;				// Como está ordenado de acordo com as definições de cada palavra reservada, estou somando
 					token.atributo = ' ';					// o índice que parou no for com 256 para obter o código da palavra reservada correta
 				}else{
 					for(i = 0; i < tabela.size(); i++){
 						if(identifier == tabela[i]){
-							printf("<ID, %d> ", i);
 							var_exist = true;
 							token.nome_token = ID;
 							token.atributo = to_string(i);
@@ -327,7 +325,6 @@ Token gera_token(){
 					}
 					if(!var_exist){
 						tabela.push_back(identifier);
-						printf("<ID, %d> ", count_tabela);	
 						token.nome_token = ID;
 						token.atributo = to_string(count_tabela);
 						count_tabela++;
@@ -445,7 +442,6 @@ Token gera_token(){
 				estado = 25;
 				break;
 			case 27:
-				printf("<literal, %s> ", literal.c_str());
 				token.nome_token = LIT;
 				token.atributo = literal;
 				literal = "";
@@ -905,7 +901,7 @@ begin_block:
 	Stmt();
 	tok = gera_token();
 	if(tok.nome_token == 59){ // Código da ;
-		cout << ";";
+		cout << "; ";
 		goto begin_block;
 	}else{
 		erro(1);
