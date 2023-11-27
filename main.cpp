@@ -182,7 +182,6 @@ Token gera_token(){
 				break;
 			case 2:
 				cont_sim_lido++;
-				printf("<relop, LE> ");
 				token.nome_token = RELOP;
 				token.atributo = to_string(LE);
 				estado = 0;
@@ -190,7 +189,6 @@ Token gera_token(){
 				return(token);
 				break;
 			case 3:
-				printf("<relop, LT> ");
 				token.nome_token = RELOP;
 				token.atributo = to_string(LT);
 				estado = 0;
@@ -220,7 +218,6 @@ Token gera_token(){
 				break;
 			case 6:
 				cont_sim_lido++;
-				printf("<relop, EQ> ");
 				token.nome_token = RELOP;
 				token.atributo = to_string(EQ);
 				estado = 0;
@@ -240,12 +237,11 @@ Token gera_token(){
 					estado = 8;
 				}else{
 					printf("Erro, nao ha caractere valido apos o ~\n");
-					exit(4);
+					exit(100);
 				}
 				break;    
 			case 8:
 				cont_sim_lido++;
-				printf("<relop, NE> ");
 				token.nome_token = RELOP;
 				token.atributo = to_string(NE);
 				estado = 0;
@@ -265,7 +261,6 @@ Token gera_token(){
 				else estado = 10;
 				break;   
 			case 10:
-				printf("<relop, GT> ");
 				token.nome_token = RELOP;
 				token.atributo = to_string(GT);
 				estado = 0;
@@ -274,7 +269,6 @@ Token gera_token(){
 				break;
 			case 11:
 				cont_sim_lido++;
-				printf("<relop, GE> ");
 				token.nome_token = RELOP;
 				token.atributo = to_string(GE);
 				estado = 0;
@@ -603,8 +597,7 @@ Token gera_token(){
 
 int main (){
 
-	void erro(), block(), Stmt();
-	void Exps(), Exp(), Vars();
+	void block();
 
 	readFile();
 	while(code[cont_sim_lido] != '\0'){
@@ -621,16 +614,25 @@ int main (){
 void erro(int erro_id){
 	switch (erro_id){
 	case 1:
-		cout << "Erro de início do bloco.";
+		cout << " Erro de ponto e virgula";
 		break;
 	case 2:
-		cout << "Erro no fechamento de statement, faltou ponto e virgula.";
+		cout << " Erro na atribuicao, faltou o =" ;
 		break;
 	case 3:
-		cout << "Erro no fechamento do bloco.";
+		cout << " Faltou um then aqui";
 		break;
 	case 4:
-		cout << "Erro na atribuicao.";
+		cout << " Faltou um end aqui";
+		break;
+	case 6:
+		cout << " Sem variavel para iniciar o for";
+		break;
+	case 7:
+		cout << " Erro, voce queria adicionar mais aluma variavel?";
+		break;
+	case 8:
+		cout << " Talvez deveria existir um \"in\" por aqui?";
 		break;
 	default:
 		break;
@@ -655,75 +657,256 @@ Verifica_Var:
 	}
 }
 
-void Exp(){
+void Function(){
 	return;
+}
+
+void PrefixExp(){
+	return;
+}
+
+void BinOp(){
+	return;
+}
+
+void T(){
+	return;
+}
+
+void Exp_(){
+	tok = gera_token();
+	BinOp();
+}
+
+void Exp(){
+	tok = gera_token();
+	if(tok.nome_token == NOT){ // Código do not
+		cout << "not ";
+		Exp();
+		Exp_();
+	}else if(tok.nome_token == SUBT){ // Código da subtração
+		cout << "- ";
+		Exp();
+		Exp_();
+	}else if(tok.nome_token == FUNCTION){ // Código da function
+		Function();
+		Exp_();
+	}else if(tok.nome_token == 123){ // Código da {
+		T();
+	}else if(tok.nome_token == NIL){ // Código do NIL
+		cout << "nil ";
+		Exp_();
+	}else if(tok.nome_token == TRUE){ // Código do true
+		cout << "true ";
+		Exp_();
+	}else if(tok.nome_token == FALSE){ // Código do false
+		cout << "false ";
+		Exp_();
+	}else if(tok.nome_token == NUM){ // Código dos dígitos
+		cout << tok.atributo << " ";
+		Exp_();
+	}else if(tok.nome_token == LIT){ // Código dos literais de string
+		cout << tok.atributo << " ";
+		Exp_();
+	}else{
+		erro(5);
+	}
 }
 
 void Exps(){
 	Exp();
+repete_exps:
 	tok = gera_token();
-	if(tok.nome_token == 40){
-		cout << "( ";
+	if(tok.nome_token == 44){ // Código da vírgula
+		cout << ", ";
+		Exp();
+		goto repete_exps;
+	}
+}
+
+void Stmt3(){
+	return;
+}
+
+void FunctionBody(){
+	return;
+}
+
+void Stmt2(){
+	tok = gera_token();
+	if(tok.nome_token == FUNCTION){
+		cout << "function ";
+		tok = gera_token();
+		if(tok.nome_token == ID){
+			FunctionBody();
+		}
+	}else if(tok.nome_token == ID){
+		Names();
+		if(tok.nome_token == ATR){
+			cout << "= ";
+			Exps();
+		}else{
+			erro(2);
+		}
+	}
+}
+
+void Stmt1_(){
+	return;
+}
+
+void Names(){
+	cout << tabela[stoi(tok.atributo)] << " ";
+repeat_names:
+	tok = gera_token();
+	if(tok.nome_token == 44){
+		cout << ", ";
+		tok = gera_token();
+		if(tok.nome_token == ID){
+			cout << tabela[stoi(tok.atributo)] << " ";
+			goto repeat_names;
+		}else{
+			erro(7);
+		}
+	}
+}
+
+void Stmt1(){
+	tok = gera_token();
+	if(tok.nome_token == ID){
+		cout << tabela[stoi(tok.atributo)] << " ";
+		tok = gera_token();
+		if(tok.nome_token == ATR){
+			cout << "= ";
+			tok = gera_token();
+			if(tok.nome_token == 44){ // Código da vírgula
+				cout << ", ";
+				Exp();
+				Stmt1_();
+				tok = gera_token();
+				if(tok.nome_token == DO){
+					cout << "do ";
+					block();
+					tok = gera_token();
+					if(tok.nome_token == END){
+						cout << "end ";
+					}
+				}
+			}
+		}else if(tok.nome_token == ID){
+			Names(); // Names ja volta com o novo token gerado
+			if(tok.nome_token == IN){
+				cout << "in ";
+				Exps();
+				tok = gera_token();
+				if(tok.nome_token == DO){
+					cout << "do ";
+					block();
+					tok = gera_token();
+					if(tok.nome_token == END){
+						cout << "end";
+					}
+				}
+			}else{
+				erro(8);
+			}
+		}
+	}else{
+		erro(6);
+	}
+}
+
+void Stmt_(){
+	if(tok.nome_token == ELSE){ // Código do else
+		cout << "else ";
+		block();
+		tok = gera_token();
 	}
 }
 
 void Stmt(){
 	void block();
 	tok = gera_token();
-	if(tok.nome_token == 277){ // 277 é o ID
+	if(tok.nome_token == ID){ // 277 é o ID
 		Vars();
-		if(tok.nome_token == 292){ // 292 é = para atribuição
+		tok = gera_token();
+		if(tok.nome_token == ATR){ // 292 é = para atribuição
 			cout << "= ";
-			tok = gera_token();
 			Exps();
 		}else{
-			erro(4);
+			erro(2);
 		}
-	}else if(tok.nome_token == 258){ // 258 é o código do do
+	}else if(tok.nome_token == DO){ // 258 é o código do do
 		cout << "do ";
-		tok = gera_token();
 		block();
-		if(tok.nome_token == 261){ // 261 é o código do end
+		if(tok.nome_token == END){ // 261 é o código do end
 			cout << "end ";
 		}
-	}else if(tok.nome_token == 276){ // 276 código do while
+	}else if(tok.nome_token == WHILE){ // 276 código do while
 		cout << "while ";
-		tok = gera_token();
 		Exp();
-		if(tok.nome_token == 258){ // 258 é o código do do
+		tok = gera_token();
+		if(tok.nome_token == DO){ // 258 é o código do do
 			cout << "do ";
-			tok = gera_token();
 			block();
 			tok = gera_token();
-			if(tok.nome_token == 261){ // 261 é o código do end
+			if(tok.nome_token == END){ // 261 é o código do end
 				cout << "end ";
 			}
 		}
+	}else if(tok.nome_token == IF){ // 265 código do if
+		cout << "if ";
+		Exp();
+		tok = gera_token();
+		if(tok.nome_token == THEN){ // 273 código do then
+			cout << "then ";
+			block();
+			elseif:
+			tok = gera_token();
+			if(tok.nome_token == ELSEIF){ // 260 código do elseif
+				cout << "elseif ";
+				Exp();
+				tok = gera_token();
+				if(tok.nome_token == THEN){ // 273 código do then
+					cout << "then ";
+					block();
+				}else{
+					erro(3);
+				}
+				goto elseif;
+			}
+			Stmt_();
+			if(tok.nome_token == END){ // Código do end
+				cout << "end ";
+			}else{
+				erro(4);
+			}
+		}
+	}else if(tok.nome_token == RETURN){
+		Stmt3();
+	}else if(tok.nome_token == BREAK){
+		cout << "break";
+	}else if(tok.nome_token == FOR){
+		cout << "for ";
+		Stmt1();
+	}else if(tok.nome_token == LOCAL){
+		cout << "local ";
+		Stmt2();
 	}
 }
 
 void block(){
-begin:
+begin_block:
 	tok = gera_token();
 	if(code[cont_sim_lido] == '\0'){
 		exit(0);
 	}
-	if(tok.nome_token == 40){
-		cout << "( "; // 40 é o ascii do (
-		Stmt();
-		tok = gera_token();
-		if(tok.nome_token == 59){ // 59 é o ascii do ;
-			cout << ";";
-			tok = gera_token();
-			if(tok.nome_token == 41){ // 41 é o ascii do )
-				cout << " )";
-				goto begin;
-			}else{
-				erro(3);
-			}
-		}else{
-			erro(2);
-		}
+
+	Stmt();
+	tok = gera_token();
+	if(tok.nome_token == 59){ // Código da ;
+		cout << ";";
+		goto begin_block;
 	}else{
 		erro(1);
 	}
