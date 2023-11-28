@@ -209,7 +209,6 @@ Token gera_token(){
 
 				break;    
 			case 5: 
-				printf("<=, > ");
 				token.nome_token = ATR;
 				token.atributo = ' ';
 				estado = 0;
@@ -365,7 +364,6 @@ Token gera_token(){
 				}
 				break;
 			case 17:
-				printf("<numero, %s> ", numeral.c_str());
 				token.nome_token = NUM;
 				token.atributo = numeral;
 				numeral = "";
@@ -645,6 +643,12 @@ void erro(int erro_id){
 	case 12:
 		cout << " Erro no fechamento do colchetes";
 		break;
+	case 13:
+		cout << " Erro no prefixo";
+		break;
+	case 14:
+		cout << " Erro no fechamento de parenteses";
+		break;
 	default:
 		break;
 	}
@@ -652,11 +656,13 @@ void erro(int erro_id){
 }
 
 void Var(){
+	void PrefixExp();
+
 	tok = gera_token();
 	if(tok.nome_token == ID){
 		cout << tabela[stoi(tok.atributo)] << " ";
-	}else if(){
-		
+	}else{
+		PrefixExp();
 	}
 	return;
 }
@@ -673,6 +679,8 @@ Verifica_Var:
 }
 
 void Field(){
+	void Exp();
+
 	if(tok.nome_token == 91){ // Codigo do [	
 		cout << "[";
 		Exp();
@@ -759,6 +767,7 @@ void BinOp(){
 }
 
 void PrefixExp_(){
+	void Exp();
 	if(tok.nome_token == 91){		// Código do [
 		cout << "[ ";
 		Exp();
@@ -772,11 +781,14 @@ void PrefixExp_(){
 }
 
 void PrefixExp(){
-	int index = cont_sim_lido;
-	Token guarda_token_anterior = tok;
+	void Exp();
+	int index;
+	Token guarda_token_anterior;
 
 	if(tok.nome_token == ID){
 		cout << tabela[stoi(tok.atributo)] << " ";
+		index = cont_sim_lido;
+		guarda_token_anterior = tok;
 		tok = gera_token();
 		if(tok.nome_token == 91){
 			PrefixExp_();
@@ -784,14 +796,31 @@ void PrefixExp(){
 			cont_sim_lido = index;
 			tok = guarda_token_anterior;
 		}
-	}else if(tok.nome_token == 40){
+	}else if(tok.nome_token == 40){		// Código do (
 		cout << "(";
+		Exp();
 		tok = gera_token();
-		PrefixExp_();
+		if(tok.nome_token == 41){
+			cout << ")";
+			index = cont_sim_lido;
+			guarda_token_anterior = tok;
+			tok = gera_token();
+			if(tok.nome_token == 91){
+				PrefixExp_();
+			}else{
+				cont_sim_lido = index;
+				tok = guarda_token_anterior;
+			}
+		}else{
+			erro(14);
+		}
+	}else{
+		erro(13);
 	}
 }
 
 void Exp_(){
+	void Exp();
 	tok = gera_token();
 	if(tok.nome_token == RELOP || (tok.nome_token >= PLUS && tok.nome_token <= DOUBLEDOT)
 		|| tok.nome_token == OR || tok.nome_token == AND){
@@ -802,6 +831,7 @@ void Exp_(){
 }
 
 void Exp(){
+	void FunctionBody();
 	tok = gera_token();
 	if(tok.nome_token == NOT){ // Código do not
 		cout << "not ";
@@ -854,10 +884,21 @@ repete_exps:
 }
 
 void Stmt3(){
-	return;
+	int index = cont_sim_lido;
+	Token guarda_token_anterior = tok;
+	tok = gera_token();
+	if(tok.nome_token == NOT || tok.nome_token == SUBT || tok.nome_token == ID
+		|| tok.nome_token == 40 || tok.nome_token == 123 || tok.nome_token == NIL
+		|| tok.nome_token == TRUE || tok.nome_token == FALSE || tok.nome_token == NUM
+		|| tok.nome_token == LIT){
+			cont_sim_lido = index;
+			tok = guarda_token_anterior;
+			Exps();
+		}
 }
 
 void Params(){
+	void Names();
 	tok = gera_token();
 	if(tok.nome_token == ID){
 		Names();
@@ -879,6 +920,7 @@ void FunctionBody(){
 }
 
 void Stmt2(){
+	void Names();
 	tok = gera_token();
 	if(tok.nome_token == FUNCTION){
 		cout << "function ";
@@ -927,6 +969,7 @@ repeat_names:
 }
 
 void Stmt1(){
+	void block();
 	tok = gera_token();
 	if(tok.nome_token == ID){
 		cout << tabela[stoi(tok.atributo)] << " ";
@@ -972,6 +1015,7 @@ void Stmt1(){
 }
 
 void Stmt_(){
+	void block();
 	if(tok.nome_token == ELSE){ // Código do else
 		cout << "else ";
 		block();
@@ -1038,6 +1082,7 @@ void Stmt(){
 			}
 		}
 	}else if(tok.nome_token == RETURN){
+		cout << "return ";
 		Stmt3();
 	}else if(tok.nome_token == BREAK){
 		cout << "break";
@@ -1062,6 +1107,7 @@ void Stmt(){
 void block(){
 begin_block:
 	tok = gera_token();
+	
 	if(code[cont_sim_lido] == '\0'){
 		exit(0);
 	}
