@@ -664,7 +664,6 @@ void Var(){
 	}else{
 		PrefixExp();
 	}
-	return;
 }
 
 void Vars(){
