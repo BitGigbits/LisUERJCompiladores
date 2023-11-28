@@ -661,8 +661,6 @@ void Var(){
 	tok = gera_token();
 	if(tok.nome_token == ID){
 		cout << tabela[stoi(tok.atributo)] << " ";
-	}else{
-		PrefixExp();
 	}
 }
 
